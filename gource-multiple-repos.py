@@ -48,11 +48,32 @@ print 'Cloning repos and creating gource logs...'
 for item in response:
     clone_url           = item['ssh_url']
     repo_dir            = "./repos/" + item['name']
-    #Repo.clone_from(clone_url, repo_dir)
+    Repo.clone_from(clone_url, repo_dir)
     log_dir             = './logs'
     repo_name           = item['name']
     gource_log_command  = 'gource --output-custom-log ' + log_dir + '/' + repo_name + '.log ' + repo_dir
-    gource_log_command2 = '''awk -F\| -v repo="''' + repo_name + '''" '{print $1 "|" $2 "|" $3 "|" repo $4}' "''' + log_dir + '/' + repo_name + '.log" > "' + log_dir + '/' + repo_name + '.gourced.log"'''
+    # prefix repos in log to get different branches in gource
+    if "abap-" in repo_name:
+        repo_prefix = "abap/" + repo_name
+    elif "ui5-" in repo_name:
+        repo_prefix = "ui5/" + repo_name
+    elif "unity-" in repo_name:
+        repo_prefix = "unity/" + repo_name
+    elif "docs-" in repo_name:
+        repo_prefix = "docs/" + repo_name
+    elif "dev-" in repo_name:
+        repo_prefix = "dev/" + repo_name
+    elif "ec2-" in repo_name:
+        repo_prefix = "dev/" + repo_name
+    elif "hybrid-" in repo_name:
+        repo_prefix = "hybrid/" + repo_name
+    elif "python-" in repo_name:
+        repo_prefix = "python/" + repo_name
+    elif "java-" in repo_name:
+        repo_prefix = "java/" + repo_name
+    elif "docker-" in repo_name:
+        repo_prefix = "docker/" + repo_name
+    gource_log_command2 = '''awk -F\| -v repo="''' + repo_prefix + '''" '{print $1 "|" $2 "|" $3 "|" repo $4}' "''' + log_dir + '/' + repo_name + '.log" > "' + log_dir + '/' + repo_name + '.gourced.log"'''
     os.system(gource_log_command)
     os.system(gource_log_command2)
 print 'Done...'
@@ -72,7 +93,7 @@ print 'Done...'
 print 'Creating rendered video...'
 ffmepg_output_file = 'gource-multi-repos.mp4'
 ffmpeg_command     = 'ffmpeg -y -r 60 -f image2pipe -vcodec ppm -i ' + output_dir + '/' + gource_output_file + ' -vcodec libx264 -preset ultrafast -pix_fmt yuv420p -crf 1 -threads 0 -bf 0 ' + output_dir + '/' +  ffmepg_output_file
-#os.system(ffmpeg_command)
+os.system(ffmpeg_command)
 print 'Done...'
 
 print 'Cleaning log directory...'
